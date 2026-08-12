@@ -1,0 +1,1443 @@
+{
+  "name": "ProyectoN8n",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "63507d86-4124-472f-a9cf-c92dcbaba836",
+      "name": "Escucha saludo",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -896,
+        16
+      ],
+      "webhookId": "6b6acd95-9b01-4c5f-aec8-b2b8832185f0",
+      "credentials": {
+        "telegramApi": {
+          "id": "UJbuxjVVU9wWip7D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Menu",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "689acffa-ce0a-4f33-9a9d-dd8e3594634d",
+      "name": "Menu productos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -432,
+        304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kMMi52sfoOBfyZ6s",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2ab356b2-8f9b-415b-ac44-2f43ee535a1d",
+              "leftValue": "={{ $json['categoría'] }}",
+              "rightValue": "={{ $('Escucha saludo').item.json.callback_query.data.toLowerCase() }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b5a4616a-1bb2-4acb-a3f2-944ed7612971",
+      "name": "Filtro de botones",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -224,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "5fcd5628-6e18-4ac2-ab8c-5198200870f8",
+      "name": "Data de botones",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f175cbbd-98d4-4ab3-b928-3470411879c1",
+              "name": "texto_menu",
+              "value": "={{ $json.data.map(p => { const n = (p.nombre || '').toLowerCase(); const e = /caf|tinto|tintico|capuc|latte|carajillo|americano|espresso|moka/.test(n) ? '☕' : /chai|chaí|arom|aromatica|aromática|infusion|te |té/.test(n) ? '🍵' : /choco/.test(n) ? '🍫' : /torta|pastel|redvelver|red velvet|naranja/.test(n) ? '🍰' : /galleta/.test(n) ? '🍪' : /croissant/.test(n) ? '🥐' : /pan|bono|yuca/.test(n) ? '🍞' : /jugo|zumo|fruta/.test(n) ? '🧃' : /gelatina/.test(n) ? '🍮' : /pudin|entrement|postre/.test(n) ? '🍨' : /avena/.test(n) ? '🥣' : '🍽️'; return e + ' ' + p.id_producto + '. ' + p.nombre + ' - $' + p.precio + '\\n' + p.descripcion; }).join('\\n\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bc07484b-5a7d-432a-9625-03825eda9ae8",
+      "name": "Categoria seleccionada",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Escucha saludo').item.json.callback_query.message.chat.id }}",
+        "text": "=Este es el menú de la categoría que seleccionaste :\n{{ $json.texto_menu}}\n",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "1e7d3bb4-a6fc-439d-9aca-81e70a8270b8",
+      "name": "Menu seleccionado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        240
+      ],
+      "webhookId": "1ee51336-812b-4952-bb77-6c8d652fa1ad",
+      "credentials": {
+        "telegramApi": {
+          "id": "UJbuxjVVU9wWip7D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Escucha saludo').item.json.callback_query.message.chat.id }}",
+        "text": "Selecciona por el número de producto el que deseas escoger 😁\n\nEj: 14",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "0a216995-d40a-43ab-b39a-a49782d64fb9",
+      "name": "Validar producto a escoger",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        576,
+        240
+      ],
+      "webhookId": "b9bfef94-5901-43bf-ad08-0938c3c44cd7",
+      "credentials": {
+        "telegramApi": {
+          "id": "UJbuxjVVU9wWip7D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "97b6bd75-3d7d-4145-854d-ef1f29f99f21",
+              "leftValue": "={{ ($json.message?.text || '').trim().toLowerCase() }}",
+              "rightValue": "confirmar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b63198fc-eb0a-4936-b9e2-2809b4d63ad2",
+      "name": "confirmar pedido",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -720,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 906675698,
+          "mode": "list",
+          "cachedResultName": "Carrito",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=906675698"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "chat_id",
+              "lookupValue": "={{ $('Escucha saludo').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "33cb934f-4c36-4dc6-8af4-30fa8a3b5c79",
+      "name": "obtener carrito final",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -496,
+        -304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "25rmJSAFnBPmFcs1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "11174f43-6e3e-4559-bb3f-e151b520ab85",
+              "name": "id_pedido",
+              "value": "={{ 'PED-' + $now.format('yyyyMMddHHmmss') }}",
+              "type": "string"
+            },
+            {
+              "id": "2a28f292-e4b3-4f80-b8f6-3fb8e8f91cba",
+              "name": "detalles_texto",
+              "value": "={{ $input.all().map(i => i.json.nombre).join(', ') }}",
+              "type": "string"
+            },
+            {
+              "id": "ae8f82da-bf2e-4399-91ec-daed128747a7",
+              "name": "total_texto",
+              "value": "={{ $input.all().map(i => Number(i.json.precio)).reduce((a,b) => a+b, 0) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bf51769c-5c10-4960-9abe-80fba397d99f",
+      "name": "generar pedido",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -272,
+        -304
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 731859978,
+          "mode": "list",
+          "cachedResultName": "Pedidos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=731859978"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_pedido": "={{ $json.id_pedido }}",
+            "id_usuario": "={{ $('Escucha saludo').item.json.message.chat.id }}",
+            "detalles_pedido": "={{ $json.detalles_texto }}",
+            "total_pago": "={{ $json.total_texto }}",
+            "fecha": "={{ $now.format('yyyy-MM-dd') }}",
+            "estado": "pendiente",
+            "hora ": "={{ $now.format('HH:mm:ss') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_pedido",
+              "displayName": "id_pedido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "id_usuario",
+              "displayName": "id_usuario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detalles_pedido",
+              "displayName": "detalles_pedido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "total_pago",
+              "displayName": "total_pago",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "hora ",
+              "displayName": "hora ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "93562229-777c-402d-a4cd-ac6d770ac6f1",
+      "name": "guardar pedidos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        -304
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "25rmJSAFnBPmFcs1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Escucha saludo').item.json.message.chat.id }}",
+        "text": "=✅ ¡Pedido confirmado! Tu número de orden es: {{ $('generar pedido').item.json.id_pedido }}\nProductos: {{ $('generar pedido').item.json.detalles_texto }}\nTotal a pagar: ${{ $('generar pedido').item.json.total_texto }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "bf59027e-99ce-43c4-8fff-868635819661",
+      "name": "Pedido confirmado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        176,
+        -304
+      ],
+      "executeOnce": true,
+      "webhookId": "8e211c3c-6dcb-4999-b713-ab60401010de",
+      "credentials": {
+        "telegramApi": {
+          "id": "UJbuxjVVU9wWip7D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Toma las filas del carrito de este cliente y las ordena de mayor a menor\n// numero de fila, para poder borrarlas sin que los indices se desplacen.\nconst rows = $('obtener carrito final').all()\n  .map(i => i.json)\n  .filter(r => r && r.row_number);\nrows.sort((a, b) => Number(b.row_number) - Number(a.row_number));\nreturn rows.map(r => ({ json: { row_number: Number(r.row_number) } }));"
+      },
+      "id": "76993cae-b35e-45a6-9890-7af0ae92d4cd",
+      "name": "Preparar vaciado carrito",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 906675698,
+          "mode": "list",
+          "cachedResultName": "Carrito",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=906675698"
+        },
+        "startIndex": "={{ $json.row_number }}"
+      },
+      "id": "07eaef2b-078f-465e-9510-01c9110859b7",
+      "name": "Vaciar carrito",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        -288
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "25rmJSAFnBPmFcs1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c1111111-0000-4000-8000-000000000001",
+              "leftValue": "={{ $json.message?.chat?.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "c1111111-0000-4000-8000-000000000002",
+              "leftValue": "={{ ($json.message?.text || '').trim() }}",
+              "rightValue": "^\\d+$",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              }
+            },
+            {
+              "id": "c1111111-0000-4000-8000-000000000003",
+              "leftValue": "={{ ($json.message?.text || '').trim().toLowerCase() }}",
+              "rightValue": "confirmar",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9e558f12-b680-49ff-b4f3-256f3ce6c640",
+      "name": "Es mensaje",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -672,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 179753234,
+          "mode": "list",
+          "cachedResultName": "Usuarios",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=179753234"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "telegram_id",
+              "lookupValue": "={{ $('Escucha saludo').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b4b0a429-ba23-4505-a5ad-a8d9c17fb89e",
+      "name": "buscar usuarios",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -672,
+        16
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kMMi52sfoOBfyZ6s",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "84f2072a-ddd0-4b78-b2d0-4afa6c9fc924",
+              "leftValue": "={{ $json.telegram_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "92c75c94-6e84-4881-9242-6b180c9df0e7",
+      "name": "Existe o no",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -272,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Escucha saludo').item.json.message.chat.id }}",
+        "text": "=¡Hola de nuevo, {{ $('buscar usuarios').item.json.nombre_completo }}! 👋\nQué alegría verte otra vez en cafetería La Finquita ☕ Disfruta un café con sabor a campo 🌄\nTienes {{ $('buscar usuarios').item.json['puntos_lealtad '] }} puntos de lealtad ⭐",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "235af494-c02d-411e-84b0-a8be2f83d651",
+      "name": "Bienvenida",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        -112
+      ],
+      "webhookId": "e4010d33-b43a-4bde-b350-ccc25af34b78",
+      "credentials": {
+        "telegramApi": {
+          "id": "UJbuxjVVU9wWip7D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Escucha saludo').item.json.message.chat.id }}",
+        "text": "Elige una de las categorías ",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Calientes ",
+                    "additionalFields": {
+                      "callback_data": "calientes"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Panaderia",
+                    "additionalFields": {
+                      "callback_data": "panaderia"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Frios",
+                    "additionalFields": {
+                      "callback_data": "frios"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "bcda2d55-211d-4160-8166-71649f869293",
+      "name": "Elegir categorias",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        48
+      ],
+      "webhookId": "7faf72f7-c0b3-4d78-859e-cd57ad23fc28",
+      "credentials": {
+        "telegramApi": {
+          "id": "UJbuxjVVU9wWip7D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 179753234,
+          "mode": "list",
+          "cachedResultName": "Usuarios",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=179753234"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telegram_id": "={{ $('Escucha saludo').item.json.message.chat.id }}",
+            "nombre_completo": "={{ $('Escucha saludo').item.json.message.chat.first_name }}"
+          },
+          "matchingColumns": [
+            "telegram_id"
+          ],
+          "schema": [
+            {
+              "id": "telegram_id",
+              "displayName": "telegram_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre_completo",
+              "displayName": "nombre_completo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "departamento/oficina",
+              "displayName": "departamento/oficina",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "puntos_lealtad ",
+              "displayName": "puntos_lealtad ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c00f125a-7ec6-4dda-a8bc-98070acf925b",
+      "name": "Info usuarios",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -448,
+        16
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "25rmJSAFnBPmFcs1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Escucha saludo').item.json.message.chat.id }}",
+        "text": "=¡Hola {{ $('Escucha saludo').item.json.message.chat.first_name }}! 🎉\n¡Eres nuevo en nuestra cafetería La Finquita! Nos alegra tenerte por acá, vivirás momentos de paz con mucho sabor y frescura 🌄😊\nYa quedaste registrado, ¡disfruta tu primer pedido!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "c544edef-3257-43dc-befb-d5f147a4e630",
+      "name": "Nuevo cliente",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        32
+      ],
+      "webhookId": "101da507-206c-4686-8ad9-11ac312df808",
+      "credentials": {
+        "telegramApi": {
+          "id": "UJbuxjVVU9wWip7D",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c2222222-0000-4000-8000-000000000001",
+              "leftValue": "={{ ($json.message?.text || '').trim() }}",
+              "rightValue": "^\\d+$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b886eb08-1d82-40ea-8160-dddd4466c89a",
+      "name": "Es producto",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -816,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Menu",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id_producto",
+              "lookupValue": "={{ $('Escucha saludo').item.json.message.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "69be6b52-64ee-4478-9eb3-b7a3afa21e44",
+      "name": "validar producto seleccionado",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        256
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kMMi52sfoOBfyZ6s",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Menu",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_producto": "={{ $('Escucha saludo').item.json.message.text }}",
+            "stock": "={{ Number($json.stock) - 1 }}"
+          },
+          "matchingColumns": [
+            "id_producto"
+          ],
+          "schema": [
+            {
+              "id": "id_producto",
+              "displayName": "id_producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "precio",
+              "displayName": "precio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoría",
+              "displayName": "categoría",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "stock",
+              "displayName": "stock",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a683a907-ef83-4904-9bc0-0d9e454c9926",
+      "name": "descontar stock",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        992,
+        256
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "25rmJSAFnBPmFcs1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 906675698,
+          "mode": "list",
+          "cachedResultName": "Carrito",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=906675698"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ $('Escucha saludo').item.json.message.chat.id }}",
+            "id_producto": "={{ $('Escucha saludo').item.json.message.text }}",
+            "nombre": "={{ $('validar producto seleccionado').item.json.nombre }}",
+            "precio": "={{ $('validar producto seleccionado').item.json.precio }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "id_producto",
+              "displayName": "id_producto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "precio",
+              "displayName": "precio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "44ee4c19-7df8-4016-8111-36f4a28d3197",
+      "name": "Carrito",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "25rmJSAFnBPmFcs1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ",
+          "mode": "list",
+          "cachedResultName": "Proyecto N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 906675698,
+          "mode": "list",
+          "cachedResultName": "Carrito",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VvF6TWsytImKABWrdY6Vb4p2vAczPjyhsx_1nldY4CQ/edit#gid=906675698"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "chat_id",
+              "lookupValue": "={{ $('Escucha saludo').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2edabc19-8b19-4bf8-8eac-5b2c1aa54146",
+      "name": "total pedido",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1376,
+        240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "25rmJSAFnBPmFcs1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Escucha saludo').item.json.message.chat.id }}",
+        "text": "=✅ Producto agregado: {{ $('validar producto seleccionado').item.json.nombre }}\nTotal acumulado: ${{ $input.all().map(i => Number(i.json.precio)).reduce((a, b) => a + b, 0) }}\n¿Deseas agregar otro producto? Escribe el número, o escribe *confirmar* para terminar. ",
+        "additionalFields": {}
+      },
+      "id": "cf7d818d-f1a5-438c-bcf6-efcf0a68bbd7",
+      "name": "Confirmacion elección",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1584,
+        240
+      ],
+      "executeOnce": true,
+      "webhookId": "53005cd9-030b-443f-a059-307354b6fd5b",
+      "credentials": {
+        "telegramApi": {
+          "id": "UJbuxjVVU9wWip7D",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Escucha saludo": {
+      "main": [
+        [
+          {
+            "node": "Menu productos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "confirmar pedido",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Es mensaje",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Es producto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Menu productos": {
+      "main": [
+        [
+          {
+            "node": "Filtro de botones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro de botones": {
+      "main": [
+        [
+          {
+            "node": "Data de botones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data de botones": {
+      "main": [
+        [
+          {
+            "node": "Categoria seleccionada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categoria seleccionada": {
+      "main": [
+        [
+          {
+            "node": "Menu seleccionado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Menu seleccionado": {
+      "main": [
+        [
+          {
+            "node": "Validar producto a escoger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "confirmar pedido": {
+      "main": [
+        [
+          {
+            "node": "obtener carrito final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "obtener carrito final": {
+      "main": [
+        [
+          {
+            "node": "generar pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generar pedido": {
+      "main": [
+        [
+          {
+            "node": "guardar pedidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "guardar pedidos": {
+      "main": [
+        [
+          {
+            "node": "Pedido confirmado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pedido confirmado": {
+      "main": [
+        [
+          {
+            "node": "Preparar vaciado carrito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar vaciado carrito": {
+      "main": [
+        [
+          {
+            "node": "Vaciar carrito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es mensaje": {
+      "main": [
+        [
+          {
+            "node": "buscar usuarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar usuarios": {
+      "main": [
+        [
+          {
+            "node": "Existe o no",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Existe o no": {
+      "main": [
+        [
+          {
+            "node": "Bienvenida",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Info usuarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bienvenida": {
+      "main": [
+        [
+          {
+            "node": "Elegir categorias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Elegir categorias": {
+      "main": [
+        [
+          {
+            "node": "Menu productos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Info usuarios": {
+      "main": [
+        [
+          {
+            "node": "Nuevo cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nuevo cliente": {
+      "main": [
+        [
+          {
+            "node": "Elegir categorias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es producto": {
+      "main": [
+        [
+          {
+            "node": "validar producto seleccionado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validar producto seleccionado": {
+      "main": [
+        [
+          {
+            "node": "descontar stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "descontar stock": {
+      "main": [
+        [
+          {
+            "node": "Carrito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Carrito": {
+      "main": [
+        [
+          {
+            "node": "total pedido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "total pedido": {
+      "main": [
+        [
+          {
+            "node": "Confirmacion elección",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "506e4edd-c688-4e27-89c7-31864b93e571",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9d364b986d0db182bb53d21bf2c0105137138c2c3f90be342651160d1b974c0"
+  },
+  "nodeGroups": [],
+  "id": "JZZnVzorAhyKG5ZB",
+  "tags": []
+}
